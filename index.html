@@ -1523,17 +1523,20 @@ PA.Studio = (function () {
     h += '<rect width="600" height="600" fill="url(#grid)"/><rect width="600" height="600" fill="url(#grid100)"/>';
     if (S.ghost) {
       h += '<g opacity=".25" pointer-events="none">' + p.target.map(function (o) { return objSvg(o); }).join('') + '</g>';
-      h += '<g pointer-events="none" fill="none" stroke="#4c6ef5" stroke-width="2" stroke-dasharray="8 6" opacity=".9">' + p.target.map(function (o) { return '<path d="' + objD(o) + '"/>'; }).join('') + '</g>';
+      // 描圖虛線放到所有圖形之上（見下方 top），這裡只留淡淡的填色
     }
+    var top = '';   // 疊在作品上面的提示層：描圖虛線、提示框
+    if (S.ghost) top += '<g pointer-events="none" fill="none" stroke-dasharray="8 6"><g stroke="#fff" stroke-width="5" opacity=".75">' + p.target.map(function (o) { return '<path d="' + objD(o) + '"/>'; }).join('') + '</g><g stroke="#4c6ef5" stroke-width="2.5">' + p.target.map(function (o) { return '<path d="' + objD(o) + '"/>'; }).join('') + '</g></g>';
     if (S.hintUsed) {
-      h += '<g pointer-events="none" font-family="Noto Sans TC, sans-serif" font-size="13">';
+      var hh = '';
+      hh += '<g pointer-events="none" font-family="Noto Sans TC, sans-serif" font-size="13">';
       p.target.forEach(function (o) {
         if (p.start && p.start.some(function (s) { return JSON.stringify(s) === JSON.stringify(o); })) return;
         var b = objBBox(o);
-        h += '<rect x="' + b.x + '" y="' + b.y + '" width="' + Math.max(b.w, 1) + '" height="' + Math.max(b.h, 1) + '" fill="none" stroke="#dcae52" stroke-width="3" stroke-dasharray="4 4"/>';
-        h += '<text x="' + (b.x + 4) + '" y="' + Math.max(14, b.y - 6) + '" fill="#8a5a10" stroke="#fff" stroke-width="3" paint-order="stroke">' + Math.round(b.x) + ',' + Math.round(b.y) + '  ' + Math.round(b.w) + '×' + Math.round(b.h) + '</text>';
+        hh += '<rect x="' + b.x + '" y="' + b.y + '" width="' + Math.max(b.w, 1) + '" height="' + Math.max(b.h, 1) + '" fill="none" stroke="#dcae52" stroke-width="3" stroke-dasharray="4 4"/>';
+        hh += '<text x="' + (b.x + 4) + '" y="' + Math.max(14, b.y - 6) + '" fill="#8a5a10" stroke="#fff" stroke-width="3" paint-order="stroke">' + Math.round(b.x) + ',' + Math.round(b.y) + '  ' + Math.round(b.w) + '×' + Math.round(b.h) + '</text>';
       });
-      h += '</g>';
+      top += hh + '</g>';
     }
     var selMode = S.tool === 'select';
     S.objs.forEach(function (o, k) {
@@ -1547,6 +1550,7 @@ PA.Studio = (function () {
       S.draft.forEach(function (q, k) { h += '<circle cx="' + q[0] + '" cy="' + q[1] + '" r="' + (k ? 6 : 9) + '" fill="' + (k ? '#fff' : '#5fcf9a') + '" stroke="#4c6ef5" stroke-width="3" pointer-events="none"/>'; });
       if (S.cursor && S.draft.length >= 3 && Math.hypot(S.cursor.x - S.draft[0][0], S.cursor.y - S.draft[0][1]) < 16) h += '<circle cx="' + S.draft[0][0] + '" cy="' + S.draft[0][1] + '" r="18" fill="none" stroke="#5fcf9a" stroke-width="4" pointer-events="none"/>';
     }
+    h += top;
     if (S.sel >= 0 && S.objs[S.sel] && selMode) {
       var o = S.objs[S.sel], b = objBBox(o);
       if (o.t === 'line') {
