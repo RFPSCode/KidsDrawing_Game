@@ -4,4 +4,4 @@
  * 例：window.CLOUD_API_URL = 'https://script.google.com/macros/s/AKfy……/exec';
  * 留空 = 單機示範模式（資料只存在這台電腦的瀏覽器）
  * ===================================================================== */
-window.CLOUD_API_URL = 'https://script.google.com/macros/s/AKfycbzEPCSdPpTR6BzngDIec1pPYGEUNF91JZoZ__U32vSc61OsJv30jWnfsu1vFiM2K5VM/exec';
+window.CLOUD_API_URL = '';
