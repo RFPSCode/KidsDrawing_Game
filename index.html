@@ -468,6 +468,35 @@ label.f { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
 .tgrid { display: grid; grid-template-columns: 320px minmax(0,1fr); gap: 12px; }
 @media (max-width: 980px) { .tgrid { grid-template-columns: minmax(0,1fr); } }
 .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.rosterbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; } .rosterbtns .btn { min-height: 38px; } .rosterbtns #tImport { grid-column: 1 / -1; }
+.pwcell { font-family: ui-monospace, Menlo, Consolas, monospace; letter-spacing: .05em; } .pwedit { margin-left: 4px; padding: 0 6px; min-height: 26px; }
+.impprev { max-height: 260px; overflow: auto; margin: 8px 0; border: 1px solid var(--line); border-radius: 10px; }
+.impprev td.bad { color: var(--bad); } .impopts { display: grid; gap: 8px; text-align: left; margin-top: 8px; } .impopts label { display: flex; gap: 8px; align-items: center; }
+.impsum { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; } .impsum span { background: rgba(255,255,255,.08); border-radius: 99px; padding: 2px 12px; }
+/* A4 列印：畫面上看不到；列印時只印 #printRoot */
+#printRoot { display: none; }
+@media print {
+  @page { size: A4 portrait; margin: 0; }
+  body.printing { background: #fff !important; }
+  body.printing > *:not(#printRoot) { display: none !important; }
+  body.printing #printRoot { display: block; color: #000; font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", sans-serif; }
+  .pa4 { width: 210mm; height: 297mm; box-sizing: border-box; page-break-after: always; break-after: page; overflow: hidden; }
+  .pa4:last-child { page-break-after: auto; break-after: auto; }
+  .pcards { padding: 8.5mm 7mm; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(8, 1fr); }
+  .pcard { border: 0.3mm dashed #999; padding: 2.5mm 3.5mm; display: grid; align-content: center; gap: 1mm; font-size: 10pt; }
+  .pct { font-size: 8.5pt; color: #555; font-weight: 700; }
+  .pcr { display: flex; gap: 2mm; align-items: baseline; } .pcr span { font-size: 8pt; color: #666; } .pcr b { font-size: 11pt; margin-right: 3mm; }
+  .pcpw b { font-family: Consolas, Menlo, monospace; font-size: 15pt; letter-spacing: 0.6mm; }
+  .pcu { font-size: 6.5pt; color: #666; word-break: break-all; line-height: 1.2; }
+  .ptable { padding: 14mm 15mm; display: flex; flex-direction: column; }
+  .ptable header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 0.6mm solid #000; padding-bottom: 2mm; font-size: 15pt; } .ptable header span { font-size: 11pt; }
+  .ptable .purl { font-size: 9pt; color: #444; margin: 2mm 0; word-break: break-all; }
+  .ptable table { width: 100%; border-collapse: collapse; margin-top: 2mm; font-size: 11.5pt; }
+  .ptable th, .ptable td { border: 0.3mm solid #444; padding: 1.6mm 2mm; text-align: center; } .ptable th { background: #eee; font-size: 10pt; }
+  .ptable td.pw { font-family: Consolas, Menlo, monospace; font-size: 13pt; letter-spacing: 0.5mm; }
+  .ptable th:nth-child(4), .ptable td:nth-child(4) { border-left: 0.8mm solid #000; }
+  .ptable footer { margin-top: auto; font-size: 9pt; color: #555; }
+}
 .tbl th, .tbl td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
 .tbl th { color: var(--muted); font-weight: 500; font-size: 12px; position: sticky; top: 0; background: var(--panel); }
 .tbl td.num { font-variant-numeric: tabular-nums; text-align: right; }
@@ -656,10 +685,20 @@ label.f { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
             <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn go" type="button" id="tSave">儲存班級設定</button><button class="btn" type="button" id="tNew">＋ 新增班級</button></div>
           </div>
         </div>
-        <div class="panel" style="margin-top:12px"><h3>批次加入學生</h3>
-          <div class="muted" style="font-size:12px">每行一位：座號、姓名、密碼（用逗號或空白分開；密碼可省略，預設 1234）。可直接從試算表複製貼上。</div>
-          <textarea class="input" id="tBatch" rows="5" style="margin-top:6px;font-family:inherit" placeholder="01 王小明 1234&#10;02 李小華 5678"></textarea>
-          <button class="btn" type="button" id="tAdd" style="margin-top:6px">加入目前班級</button>
+        <div class="panel" style="margin-top:12px"><h3>學生名冊與密碼</h3>
+          <div class="rosterbtns">
+            <button class="btn go" type="button" id="tImport">📥 匯入 Excel 名冊</button>
+            <button class="btn" type="button" id="tTpl">⬇ 下載 Excel 範本</button>
+            <button class="btn" type="button" id="tResetPw">🔑 全班重設密碼</button>
+            <button class="btn" type="button" id="tPrint">🖨 列印 A4 密碼表</button>
+            <button class="btn" type="button" id="tExport">⬇ 匯出帳號 Excel</button>
+          </div>
+          <input type="file" id="tFile" accept=".xlsx,.csv,.txt,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" hidden>
+          <div class="muted" style="font-size:12px;margin-top:6px">Excel 欄位：班級代號、班級名稱、座號、姓名、密碼。班級不存在會自動建立；密碼空白會自動產生。個別學生的密碼可以在右邊表格按 ✏ 修改。</div>
+          <details style="margin-top:8px"><summary class="muted" style="font-size:13px;cursor:pointer">或直接貼上（座號 姓名 密碼）</summary>
+            <textarea class="input" id="tBatch" rows="5" style="margin-top:6px;font-family:inherit" placeholder="01 王小明 1234&#10;02 李小華"></textarea>
+            <button class="btn" type="button" id="tAdd" style="margin-top:6px">加入目前班級</button>
+          </details>
         </div>
       </div>
       <div>
@@ -748,7 +787,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
  *   ‧ 後端商業邏輯 makeServer(env)：雲端時 env 接 Google 試算表，單機示範時 env 接記憶體
  * ========================================================================== */
 
-var PA_VERSION = '2.4.1（拒毒萌芽小畫家・夥伴進化版）';
+var PA_VERSION = '2.5.0（拒毒萌芽小畫家・名冊管理版）';
 var SCHEMA_VERSION = 4;  // 試算表欄位版本（加欄位時 +1）
 var LEVELS_VERSION = 'INK-2026-11-12a';
 
@@ -2156,8 +2195,42 @@ function makeServer(env) {
         cache.del('PA_PROG_' + cls);
         return { status: 'ok', message: '新增 ' + added + ' 位、更新 ' + updated + ' 位。' };
       }
+      if (op === 'import') {
+        // Excel 名冊匯入：班級不存在就自動建立；密碼空白時，舊學生保留原密碼、新學生由前端先產生好
+        var clsMap = classes(), newCls = [], add2 = 0, upd2 = 0, skip = [], out = [];
+        (req.list || []).forEach(function (it, i) {
+          var cid = String(it.classId || '').trim(), seat = pad2(it.seat), name = String(it.name || '').trim(), pw = String(it.password || '').trim();
+          if (!cid || !seat || !name) { skip.push('第 ' + (it.row || i + 2) + ' 列：班級、座號或姓名空白'); return; }
+          if (!/^[A-Za-z0-9_-]{1,12}$/.test(cid)) { skip.push('第 ' + (it.row || i + 2) + ' 列：班級代號「' + cid + '」只能用英文或數字'); return; }
+          if (!/^\d{1,2}$/.test(seat)) { skip.push('第 ' + (it.row || i + 2) + ' 列：座號「' + seat + '」要是 1～99 的數字'); return; }
+          if (!clsMap[cid]) {
+            db.append(SHEETS.CLASSES, [cid, String(it.className || '').trim() || cid, 'OPEN', '00:00', '23:59', maxLevelOf(999), '', env.nowIso()]);
+            clsMap[cid] = { classId: cid }; newCls.push(cid); cache.del('PA_CLASSES');
+          }
+          var ex = list.filter(function (x) { return String(x.Class_ID).trim() === cid && pad2(x.Seat_No) === seat; })[0];
+          if (ex) {
+            setF(SHEETS.STUDENTS, ex._r, 'Name', name);
+            if (pw && (req.overwrite || !String(ex.Password).trim())) setF(SHEETS.STUDENTS, ex._r, 'Password', pw); else pw = String(ex.Password);
+            upd2++;
+          } else {
+            if (!pw) pw = '1234';
+            var row = [cid + '_' + seat, cid, seat, name, pw, '', ECON.START_GOLD, 'W1-01', 0, '{}', JSON.stringify(DEFAULT_LOOK), '{}', '', '[]', '{}', '{}'];
+            db.append(SHEETS.STUDENTS, row); list.push({ Student_ID: row[0], Class_ID: cid, Seat_No: seat, Name: name, Password: pw }); add2++;
+          }
+          out.push({ classId: cid, seat: seat, name: name, password: pw });
+          cache.del('PA_PROG_' + cid);
+        });
+        return { status: 'ok', added: add2, updated: upd2, newClasses: newCls, skipped: skip, list: out,
+          message: (newCls.length ? '建立班級 ' + newCls.join('、') + '；' : '') + '新增 ' + add2 + ' 位、更新 ' + upd2 + ' 位' + (skip.length ? '；略過 ' + skip.length + ' 列' : '') + '。' };
+      }
+      if (op === 'setPasswords') {
+        // 全班（或多位）一次改密碼：list = [{ studentId, password }]
+        var n = 0;
+        (req.list || []).forEach(function (it) { var x = byId(it.studentId), pw = String(it.password || '').trim(); if (x && pw) { setF(SHEETS.STUDENTS, x._r, 'Password', pw); n++; } });
+        return { status: 'ok', message: '已更新 ' + n + ' 位學生的密碼。' };
+      }
       var s = byId(req.studentId); if (!s) return { status: 'error', message: '找不到這位學生。' };
-      if (op === 'password') { setF(SHEETS.STUDENTS, s._r, 'Password', String(req.password || '1234')); return { status: 'ok', message: '密碼已更新。' }; }
+      if (op === 'password') { var np = String(req.password || '').trim(); if (!/^[A-Za-z0-9]{3,12}$/.test(np)) return { status: 'error', message: '密碼要 3～12 個英文字母或數字。' }; setF(SHEETS.STUDENTS, s._r, 'Password', np); return { status: 'ok', message: s.Name + ' 的密碼已改成 ' + np + '。' }; }
       if (op === 'rename') { setF(SHEETS.STUDENTS, s._r, 'Name', String(req.name || s.Name)); return { status: 'ok', message: '姓名已更新。' }; }
       if (op === 'kick') { setF(SHEETS.STUDENTS, s._r, 'Session_Token', ''); cache.del('PA_TOKEN_' + s.Student_ID); return { status: 'ok', message: '已讓這位學生登出。' }; }
       if (op === 'resetProgress') {
@@ -7151,6 +7224,217 @@ PA.Studio = (function () {
 })(window);
 
 /* ============================================================================
+ * 名冊工具：讀 Excel／CSV、產生 Excel 範本、產生密碼、A4 列印帳號卡與密碼表
+ * 不依賴外部函式庫：xlsx 用瀏覽器內建的 DecompressionStream 解壓縮，範本用不壓縮的 zip 寫出。
+ * ========================================================================== */
+PA.Roster = (function () {
+  'use strict';
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var te = new TextEncoder(), td = new TextDecoder('utf-8');
+
+  /* ---------- 密碼 ---------- */
+  var ALNUM = 'abcdefghjkmnpqrstuvwxyz23456789';   // 去掉容易看錯的 i l o 0 1
+  function rnd(n) { var a = new Uint32Array(1); (window.crypto || window.msCrypto).getRandomValues(a); return a[0] % n; }
+  /** mode：'d4' 4 碼數字（不以 0 開頭，避免 Excel 吃掉）、'd6' 6 碼數字、'a6' 6 碼英數 */
+  function genPw(mode) {
+    var s = '', i;
+    if (mode === 'a6') { for (i = 0; i < 6; i++) s += ALNUM.charAt(rnd(ALNUM.length)); return /\d/.test(s) && /[a-z]/.test(s) ? s : genPw(mode); }
+    var n = mode === 'd6' ? 6 : 4;
+    s = String(1 + rnd(9)); for (i = 1; i < n; i++) s += rnd(10);
+    return /^(\d)\1+$/.test(s) || '0123456789'.indexOf(s) >= 0 || '9876543210'.indexOf(s) >= 0 ? genPw(mode) : s;   // 不要 1111、1234 這種
+  }
+
+  /* ---------- zip ---------- */
+  var CRC = (function () { var t = new Uint32Array(256); for (var n = 0; n < 256; n++) { var c = n; for (var k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  function crc32(b) { var c = 0xffffffff; for (var i = 0; i < b.length; i++) c = CRC[(c ^ b[i]) & 0xff] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; }
+  /** 寫出不壓縮的 zip（檔名標成 UTF-8） */
+  function zipStore(files) {
+    var parts = [], cen = [], off = 0;
+    files.forEach(function (f) {
+      var name = te.encode(f.name), data = typeof f.data === 'string' ? te.encode(f.data) : f.data, crc = crc32(data);
+      var h = new DataView(new ArrayBuffer(30));
+      h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true);
+      h.setUint32(14, crc, true); h.setUint32(18, data.length, true); h.setUint32(22, data.length, true); h.setUint16(26, name.length, true);
+      parts.push(new Uint8Array(h.buffer), name, data);
+      var c = new DataView(new ArrayBuffer(46));
+      c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true);
+      c.setUint32(16, crc, true); c.setUint32(20, data.length, true); c.setUint32(24, data.length, true); c.setUint16(28, name.length, true); c.setUint32(42, off, true);
+      cen.push(new Uint8Array(c.buffer), name);
+      off += 30 + name.length + data.length;
+    });
+    var csize = cen.reduce(function (a, b) { return a + b.length; }, 0), e = new DataView(new ArrayBuffer(22));
+    e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, csize, true); e.setUint32(16, off, true);
+    return new Blob(parts.concat(cen, [new Uint8Array(e.buffer)]), { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  }
+  /** 讀 zip：回傳 { 檔名: Uint8Array }（只解需要的檔案） */
+  function unzip(buf, want) {
+    var u = new Uint8Array(buf), dv = new DataView(buf), eo = -1;
+    for (var i = u.length - 22; i >= Math.max(0, u.length - 65557); i--) if (dv.getUint32(i, true) === 0x06054b50) { eo = i; break; }
+    if (eo < 0) return Promise.reject(new Error('這不是 Excel（.xlsx）檔案。'));
+    var n = dv.getUint16(eo + 10, true), p = dv.getUint32(eo + 16, true), jobs = [], out = {};
+    for (var k = 0; k < n; k++) {
+      var method = dv.getUint16(p + 10, true), csz = dv.getUint32(p + 20, true), nl = dv.getUint16(p + 28, true), xl = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true), lo = dv.getUint32(p + 42, true);
+      var name = td.decode(u.subarray(p + 46, p + 46 + nl));
+      p += 46 + nl + xl + cl;
+      if (!want(name)) continue;
+      var ds = lo + 30 + dv.getUint16(lo + 26, true) + dv.getUint16(lo + 28, true), raw = u.subarray(ds, ds + csz);
+      jobs.push((function (name, method, raw) {
+        if (method === 0) { out[name] = raw; return Promise.resolve(); }
+        if (method !== 8) return Promise.reject(new Error('不支援的壓縮方式'));
+        if (typeof DecompressionStream === 'undefined') return Promise.reject(new Error('這個瀏覽器太舊，不能讀 Excel。請改用 Chrome／Edge，或把名冊另存成 CSV。'));
+        return new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer().then(function (b) { out[name] = new Uint8Array(b); });
+      })(name, method, raw));
+    }
+    return Promise.all(jobs).then(function () { return out; });
+  }
+
+  /* ---------- 讀 Excel／CSV → 二維陣列 ---------- */
+  function xmlDoc(bytes) { return new DOMParser().parseFromString(td.decode(bytes), 'application/xml'); }
+  function tags(node, name) { return Array.prototype.slice.call(node.getElementsByTagNameNS('*', name)); }
+  function colIdx(ref) { var m = /^([A-Z]+)/.exec(ref || ''), n = 0; if (!m) return -1; for (var i = 0; i < m[1].length; i++) n = n * 26 + m[1].charCodeAt(i) - 64; return n - 1; }
+  function readXlsx(buf) {
+    return unzip(buf, function (n) { return /^xl\/(sharedStrings\.xml|workbook\.xml|_rels\/workbook\.xml\.rels|worksheets\/sheet\d+\.xml)$/.test(n); }).then(function (f) {
+      var ss = f['xl/sharedStrings.xml'] ? tags(xmlDoc(f['xl/sharedStrings.xml']), 'si').map(function (si) { return tags(si, 't').map(function (t) { return t.textContent; }).join(''); }) : [];
+      // 第一個工作表（依活頁簿裡的順序）
+      var path = 'xl/worksheets/sheet1.xml';
+      try {
+        var wb = xmlDoc(f['xl/workbook.xml']), first = tags(wb, 'sheet')[0], rid = first && (first.getAttribute('r:id') || first.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id'));
+        tags(xmlDoc(f['xl/_rels/workbook.xml.rels']), 'Relationship').forEach(function (r) { if (r.getAttribute('Id') === rid) { var t = r.getAttribute('Target').replace(/^\/?xl\//, '').replace(/^\//, ''); path = 'xl/' + t; } });
+      } catch (e) { /* 用 sheet1 */ }
+      if (!f[path]) throw new Error('Excel 裡找不到工作表。');
+      var rows = [];
+      tags(xmlDoc(f[path]), 'row').forEach(function (r) {
+        var ri = (+r.getAttribute('r') || rows.length + 1) - 1, line = rows[ri] = rows[ri] || [];
+        tags(r, 'c').forEach(function (c, k) {
+          var t = c.getAttribute('t'), v = tags(c, 'v')[0], ci = colIdx(c.getAttribute('r')); if (ci < 0) ci = k;
+          var val = t === 's' ? ss[+(v && v.textContent)] : t === 'inlineStr' ? tags(c, 't').map(function (x) { return x.textContent; }).join('') : v ? v.textContent : '';
+          if (t !== 's' && t !== 'inlineStr' && t !== 'str' && /^-?\d+\.0+$/.test(val)) val = val.replace(/\.0+$/, '');
+          line[ci] = val == null ? '' : String(val);
+        });
+      });
+      for (var i = 0; i < rows.length; i++) rows[i] = rows[i] || [];
+      return rows;
+    });
+  }
+  function readCsv(text) {
+    text = text.replace(/^﻿/, '');
+    var rows = [], row = [], cur = '', q = false, sep = (text.split('\n')[0].match(/\t/g) || []).length > (text.split('\n')[0].match(/,/g) || []).length ? '\t' : ',';
+    for (var i = 0; i < text.length; i++) {
+      var ch = text.charAt(i);
+      if (q) { if (ch === '"') { if (text.charAt(i + 1) === '"') { cur += '"'; i++; } else q = false; } else cur += ch; }
+      else if (ch === '"') q = true; else if (ch === sep) { row.push(cur); cur = ''; } else if (ch === '\n') { row.push(cur.replace(/\r$/, '')); rows.push(row); row = []; cur = ''; } else cur += ch;
+    }
+    if (cur || row.length) { row.push(cur.replace(/\r$/, '')); rows.push(row); }
+    return rows;
+  }
+  function readFile(file) {
+    return file.arrayBuffer().then(function (buf) {
+      var u = new Uint8Array(buf);
+      if (u[0] === 0x50 && u[1] === 0x4b) return readXlsx(buf);
+      if (u[0] === 0xd0 && u[1] === 0xcf) throw new Error('這是舊版 Excel（.xls）。請在 Excel 按「另存新檔」選「Excel 活頁簿（.xlsx）」再匯入。');
+      var text = td.decode(u); if (text.indexOf('�') >= 0) try { text = new TextDecoder('big5').decode(u); } catch (e) { /* 保留 */ }
+      return readCsv(text);
+    });
+  }
+
+  /* ---------- 把表格對應成名冊 ---------- */
+  var HEAD = { classId: /班級代號|班級代碼|班級編號|^班級$|^班$|class/i, className: /班級名稱|班名/, seat: /座號|號碼|^號$|seat/i, name: /姓名|名字|學生|name/i, password: /密碼|password|pw/i };
+  /** 回傳 { list: [{ row, classId, className, seat, name, password }], cols } */
+  function mapRows(rows, defClass) {
+    var hi = -1, cols = {};
+    for (var r = 0; r < Math.min(rows.length, 10) && hi < 0; r++) {
+      var c = {}; (rows[r] || []).forEach(function (v, i) { v = String(v || '').trim(); Object.keys(HEAD).forEach(function (k) { if (c[k] == null && v && HEAD[k].test(v) && !(k === 'name' && /班/.test(v)) && !(k === 'classId' && /名稱/.test(v))) c[k] = i; }); });
+      if (c.seat != null && c.name != null) { hi = r; cols = c; }
+    }
+    if (hi < 0) { cols = { seat: 0, name: 1, password: 2 }; hi = -1; }    // 沒有標題列：座號、姓名、密碼
+    var list = [];
+    for (var i = hi + 1; i < rows.length; i++) {
+      var R = rows[i] || [], g = function (k) { return cols[k] == null ? '' : String(R[cols[k]] == null ? '' : R[cols[k]]).trim(); };
+      var it = { row: i + 1, classId: g('classId') || defClass || '', className: g('className'), seat: g('seat').replace(/^0+(?=\d)/, ''), name: g('name'), password: g('password') };
+      if (!it.name && !it.seat) continue;
+      if (/^\d+$/.test(it.seat)) it.seat = it.seat.padStart(2, '0');
+      list.push(it);
+    }
+    return { list: list, cols: cols };
+  }
+
+  /* ---------- Excel 範本 ---------- */
+  function xmlEsc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function sheetXml(rows, widths, styleRow0) {
+    var cols = '<cols>' + widths.map(function (w, i) { return '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + w + '" customWidth="1"/>'; }).join('') + '</cols>';
+    var body = rows.map(function (r, ri) {
+      return '<row r="' + (ri + 1) + '">' + r.map(function (v, ci) { var ref = String.fromCharCode(65 + ci) + (ri + 1); return '<c r="' + ref + '" t="inlineStr" s="' + (ri === 0 && styleRow0 ? 1 : 2) + '"><is><t xml:space="preserve">' + xmlEsc(v) + '</t></is></c>'; }).join('') + '</row>';
+    }).join('');
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>' + cols + '<sheetData>' + body + '</sheetData></worksheet>';
+  }
+  function xlsx(sheets) {
+    var ct = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+      sheets.map(function (s, i) { return '<Override PartName="/xl/worksheets/sheet' + (i + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'; }).join('') + '</Types>';
+    var rels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
+    var wb = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>' + sheets.map(function (s, i) { return '<sheet name="' + xmlEsc(s.name) + '" sheetId="' + (i + 1) + '" r:id="rId' + (i + 1) + '"/>'; }).join('') + '</sheets></workbook>';
+    var wbr = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' + sheets.map(function (s, i) { return '<Relationship Id="rId' + (i + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet' + (i + 1) + '.xml"/>'; }).join('') + '<Relationship Id="rId99" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>';
+    // 樣式：0 預設、1 標題（粗體＋底色）、2 文字格式（@，避免 0472 變成 472）
+    var st = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="12"/><name val="Microsoft JhengHei"/></font><font><b/><sz val="12"/><name val="Microsoft JhengHei"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFE9B0"/></patternFill></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf/></cellStyleXfs><cellXfs count="3"><xf/><xf fontId="1" fillId="2" numFmtId="49" applyFont="1" applyFill="1" applyNumberFormat="1"/><xf numFmtId="49" applyNumberFormat="1"/></cellXfs></styleSheet>';
+    var files = [{ name: '[Content_Types].xml', data: ct }, { name: '_rels/.rels', data: rels }, { name: 'xl/workbook.xml', data: wb }, { name: 'xl/_rels/workbook.xml.rels', data: wbr }, { name: 'xl/styles.xml', data: st }];
+    sheets.forEach(function (s, i) { files.push({ name: 'xl/worksheets/sheet' + (i + 1) + '.xml', data: sheetXml(s.rows, s.widths, true) }); });
+    return zipStore(files);
+  }
+  function template(classId, className) {
+    var rows = [['班級代號', '班級名稱', '座號', '姓名', '密碼']];
+    for (var i = 1; i <= 30; i++) rows.push([classId || '', className || '', String(i).padStart(2, '0'), '', '']);
+    return xlsx([
+      { name: '學生名冊', rows: rows, widths: [12, 14, 8, 14, 12] },
+      { name: '範例', rows: [['班級代號', '班級名稱', '座號', '姓名', '密碼'], ['601', '六年一班', '01', '王小明', ''], ['601', '六年一班', '02', '李小華', '5821'], ['602', '六年二班', '01', '陳大文', '']], widths: [12, 14, 8, 14, 12] },
+      { name: '填寫說明', rows: [['填寫說明'], ['1. 一列一位學生。只會讀第一個工作表「學生名冊」。'], ['2. 班級代號只能用英文或數字（例：601）。班級不存在時，匯入時會自動建立。'], ['3. 班級代號空白時，會加入主控台目前選的班級。'], ['4. 密碼可以空白：新學生會依你在主控台選的方式自動產生；已經有帳號的學生保留原本的密碼。'], ['5. 座號、密碼請保持「文字」格式，開頭的 0 才不會不見。'], ['6. 姓名空白的列會被略過，可以多留幾列。']], widths: [80] }
+    ]);
+  }
+  function exportXlsx(list, title) {
+    return xlsx([{ name: title || '帳號密碼', rows: [['班級代號', '班級名稱', '座號', '姓名', '密碼']].concat(list.map(function (s) { return [s.classId, s.className || '', s.seat, s.name, s.password]; })), widths: [12, 14, 8, 14, 12] }]);
+  }
+  function download(blob, name) { var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 800); }
+
+  /* ---------- A4 列印 ---------- */
+  /** layout：'cards'（帳號卡，每頁 3×8＝24 張，可沿虛線剪下）或 'table'（密碼一覽表，每頁 35 人） */
+  function print(list, opt) {
+    opt = opt || {};
+    var host = document.getElementById('printRoot'); if (!host) { host = document.createElement('div'); host.id = 'printRoot'; document.body.appendChild(host); }
+    var url = opt.url || '', title = opt.title || '', h = '', i;
+    var byCls = {}; list.forEach(function (s) { (byCls[s.classId] = byCls[s.classId] || []).push(s); });
+    Object.keys(byCls).sort().forEach(function (cid) {
+      var L = byCls[cid].slice().sort(function (a, b) { return String(a.seat).localeCompare(String(b.seat)); }), cname = L[0].className || cid;
+      if (opt.layout === 'table') {
+        for (i = 0; i < L.length; i += 35) {
+          h += '<section class="pa4 ptable"><header><b>' + esc(title) + '　班級密碼表</b><span>班級 ' + esc(cid) + (cname !== cid ? '　' + esc(cname) : '') + (L.length > 35 ? '　第 ' + (i / 35 + 1) + ' 頁' : '') + '</span></header>' +
+            (url ? '<p class="purl">遊戲網址：' + esc(url) + '</p>' : '') +
+            '<table><thead><tr><th>座號</th><th>姓名</th><th>密碼</th><th>座號</th><th>姓名</th><th>密碼</th></tr></thead><tbody>';
+          var chunk = L.slice(i, i + 35), half = Math.ceil(chunk.length / 2);
+          for (var r = 0; r < half; r++) {
+            var a = chunk[r], b = chunk[r + half];
+            h += '<tr><td>' + esc(a.seat) + '</td><td>' + esc(a.name) + '</td><td class="pw">' + esc(a.password) + '</td>' + (b ? '<td>' + esc(b.seat) + '</td><td>' + esc(b.name) + '</td><td class="pw">' + esc(b.password) + '</td>' : '<td></td><td></td><td></td>') + '</tr>';
+          }
+          h += '</tbody></table><footer>請妥善保管，不要給別人看自己的密碼。列印日期：' + new Date().toLocaleDateString('zh-TW') + '</footer></section>';
+        }
+      } else {
+        for (i = 0; i < L.length; i += 24) {
+          h += '<section class="pa4 pcards">' + L.slice(i, i + 24).map(function (s) {
+            return '<div class="pcard"><div class="pct">' + esc(title) + '</div><div class="pcr"><span>班級</span><b>' + esc(cid) + (cname !== cid ? ' ' + esc(cname) : '') + '</b></div><div class="pcr"><span>座號</span><b>' + esc(s.seat) + '</b><span>姓名</span><b>' + esc(s.name) + '</b></div><div class="pcr pcpw"><span>密碼</span><b>' + esc(s.password) + '</b></div>' + (url ? '<div class="pcu">' + esc(url) + '</div>' : '') + '</div>';
+          }).join('') + '</section>';
+        }
+      }
+    });
+    host.innerHTML = h;
+    document.body.classList.add('printing');
+    var done = function () { document.body.classList.remove('printing'); window.removeEventListener('afterprint', done); };
+    window.addEventListener('afterprint', done);
+    if (opt.noPrint) return host;
+    setTimeout(function () { window.print(); }, 60);
+    return host;
+  }
+
+  return { genPw: genPw, readFile: readFile, mapRows: mapRows, template: template, exportXlsx: exportXlsx, download: download, print: print, _readXlsx: readXlsx, _readCsv: readCsv };
+})();
+
+/* ============================================================================
  * 畫家學院｜主程式：連線、登入、學院地圖、過關結算、教師主控台
  * ========================================================================== */
 (function () {
@@ -8180,7 +8464,7 @@ PA.Studio = (function () {
     $('#tSum').textContent = '共 ' + list.length + ' 人，' + list.filter(function (s) { return boss && s.stars[boss.id]; }).length + ' 人已吹散第一位毒霧魔王';
     $('#tTable').innerHTML = '<tr><th>座號</th><th>姓名</th><th>密碼</th><th>目前關卡</th><th>總星數</th><th>金幣</th><th>拒毒徽章</th><th>本關失敗</th><th>最後上線</th><th>操作</th></tr>' + list.map(function (s) {
       var l = lmap[s.currentLevel], a = ago(s.lastActive), done = boss && s.stars[boss.id];
-      return '<tr class="' + (s.failCount >= 3 ? 'stuck' : '') + '"><td>' + esc(s.seatNo) + '</td><td>' + esc(s.name) + '</td><td>' + esc(s.password) + '</td><td>' + (done ? '🏆 第一世界全破' : l ? esc(l.id + ' ' + l.title) : esc(s.currentLevel)) + '</td><td class="num">' + totalStars(s.stars) + '</td><td class="num">' + s.gold + '</td><td class="num">🛡 ' + badgeCount(s.badges || {}) + '</td><td class="num">' + (s.failCount >= 3 ? '🚨 ' : '') + s.failCount + '</td><td><span class="dotlive' + (a.live ? ' on' : '') + '"></span>' + a.t + '</td>' +
+      return '<tr class="' + (s.failCount >= 3 ? 'stuck' : '') + '"><td>' + esc(s.seatNo) + '</td><td>' + esc(s.name) + '</td><td><span class="pwcell">' + esc(s.password) + '</span><button type="button" class="btn sm pwedit" data-op="pw" data-id="' + esc(s.studentId) + '" title="修改 ' + esc(s.name) + ' 的密碼" aria-label="修改 ' + esc(s.name) + ' 的密碼">✏</button></td><td>' + (done ? '🏆 第一世界全破' : l ? esc(l.id + ' ' + l.title) : esc(s.currentLevel)) + '</td><td class="num">' + totalStars(s.stars) + '</td><td class="num">' + s.gold + '</td><td class="num">🛡 ' + badgeCount(s.badges || {}) + '</td><td class="num">' + (s.failCount >= 3 ? '🚨 ' : '') + s.failCount + '</td><td><span class="dotlive' + (a.live ? ' on' : '') + '"></span>' + a.t + '</td>' +
         '<td><button type="button" class="btn sm" data-op="works" data-id="' + esc(s.studentId) + '">作品</button> <button type="button" class="btn sm" data-op="more" data-id="' + esc(s.studentId) + '">⋯</button></td></tr>';
     }).join('');
   }
@@ -8209,14 +8493,114 @@ PA.Studio = (function () {
     var b = e.target.closest('[data-op]'); if (!b) return;
     var s = T.dash.students.filter(function (x) { return x.studentId === b.dataset.id; })[0]; if (!s) return;
     if (b.dataset.op === 'works') return showWorks(s);
-    PA.message(s.seatNo + ' ' + s.name, '<div class="form" style="text-align:left"><label class="f">新密碼<input class="input" id="npw" value="' + esc(s.password) + '"></label></div>', [
-      { label: '儲存密碼', fn: function () { op(s, 'password', { password: $('#npw').value.trim() || '1234' }); } },
+    if (b.dataset.op === 'pw') return editPw(s);
+    PA.message(s.seatNo + ' ' + s.name, '<div class="muted" style="font-size:13px">目前密碼：<b class="pwcell">' + esc(s.password) + '</b></div>', [
+      { label: '🔑 改密碼', fn: function () { setTimeout(function () { editPw(s); }, 10); return true; } },
       { label: '強制登出', fn: function () { op(s, 'kick'); } },
       { label: '重設進度', red: true, fn: function () { confirmOp('重設 ' + s.name + ' 的進度？', '星星、金幣和目前關卡都會歸零，無法復原。', function () { op(s, 'resetProgress'); }); return true; } },
       { label: '刪除學生', red: true, fn: function () { confirmOp('刪除 ' + s.name + '？', '帳號會從班級移除，無法復原。', function () { op(s, 'delete'); }); return true; } },
       { label: '關閉', go: true }
     ]);
   });
+  /* ---------- 名冊與密碼 ---------- */
+  var PWMODES = [['d4', '4 碼數字（例：5821）'], ['d6', '6 碼數字'], ['a6', '6 碼英數（例：k7m2qx，較安全）']];
+  function pwModeSel(id) { var m = localStorage.getItem('pa_pwmode') || 'd4'; return '<select class="input" id="' + id + '">' + PWMODES.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === m ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select>'; }
+  function pwMode(id) { var v = $('#' + id).value; try { localStorage.setItem('pa_pwmode', v); } catch (e) { /* 無痕模式 */ } return v; }
+  function gameUrl() { return CLOUD && !/script\.google/.test(location.hostname) ? location.origin + location.pathname : CLOUD ? '' : ''; }
+  function classStudents(cid) { return T.dash.students.filter(function (s) { return s.classId === cid; }).sort(function (a, b) { return a.seatNo.localeCompare(b.seatNo); }); }
+  function className(cid) { var c = (T.dash.classes || []).filter(function (x) { return x.classId === cid; })[0]; return c ? c.name : cid; }
+  function toPrint(list) { return list.map(function (s) { return { classId: s.classId, className: s.className || className(s.classId), seat: s.seatNo || s.seat, name: s.name, password: s.password }; }); }
+  /** 列印選單：帳號卡（剪下來發給學生）或密碼一覽表（老師留存） */
+  function printMenu(list, title) {
+    if (!list.length) { PA.toast('這個班級還沒有學生'); return; }
+    PA.message(title || '列印 A4 密碼表', '<div style="text-align:left;font-size:13.5px;line-height:1.7"><b>帳號卡</b>：每張 A4 印 24 張小卡（3 欄 × 8 列），沿虛線剪下發給學生。<br><b>密碼一覽表</b>：每張 A4 一個班、最多 35 人，給老師留存。<br><span class="muted">列印視窗出現後，紙張選 A4、邊界選「無」、縮放選「100%」。共 ' + list.length + ' 人。</span></div>', [
+      { label: '取消' },
+      { label: '🖨 密碼一覽表', fn: function () { PA.Roster.print(toPrint(list), { layout: 'table', title: '拒毒萌芽小畫家', url: gameUrl() }); } },
+      { label: '🖨 帳號卡', go: true, fn: function () { PA.Roster.print(toPrint(list), { layout: 'cards', title: '拒毒萌芽小畫家', url: gameUrl() }); } }
+    ]);
+  }
+  function editPw(s) {
+    PA.message('修改密碼：' + s.seatNo + ' ' + s.name, '<div class="form" style="text-align:left"><label class="f">新密碼（3～12 個英文字母或數字）<input class="input pwcell" id="npw" value="' + esc(s.password) + '" maxlength="12" autocomplete="off" spellcheck="false"></label>' +
+      '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">' + pwModeSel('npwMode') + '<button type="button" class="btn sm" id="npwGen">🎲 隨機產生</button></div><div class="muted" id="npwMsg" style="font-size:12px;min-height:1.4em"></div></div>', [
+      { label: '取消' },
+      { label: '儲存密碼', go: true, fn: function () {
+        var v = $('#npw').value.trim();
+        if (!/^[A-Za-z0-9]{3,12}$/.test(v)) { $('#npwMsg').textContent = '⚠ 密碼要 3～12 個英文字母或數字。'; return true; }
+        tApi({ action: 'manageStudents', op: 'password', studentId: s.studentId, password: v }).then(function (r) { if (r.status === 'ok') { PA.toast(r.message); loadDash(); } else PA.message('沒有改成功', esc(r.message)); });
+      } }
+    ]);
+    $('#npwGen').onclick = function () { $('#npw').value = PA.Roster.genPw(pwMode('npwMode')); $('#npw').focus(); };
+    setTimeout(function () { var i = $('#npw'); i.focus(); i.select(); }, 40);
+  }
+  $('#tTpl').onclick = function () { var c = curClass(); PA.Roster.download(PA.Roster.template(c ? c.classId : '', c ? c.name : ''), '學生名冊範本.xlsx'); };
+  $('#tExport').onclick = function () {
+    var list = toPrint(classStudents(T.cls)); if (!list.length) { PA.toast('這個班級還沒有學生'); return; }
+    PA.Roster.download(PA.Roster.exportXlsx(list, '班級 ' + T.cls), '帳號密碼_' + T.cls + '.xlsx');
+  };
+  $('#tPrint').onclick = function () { printMenu(classStudents(T.cls), '列印 ' + T.cls + ' ' + className(T.cls) + ' 的密碼表'); };
+  $('#tResetPw').onclick = function () {
+    var list = classStudents(T.cls); if (!list.length) { PA.toast('這個班級還沒有學生'); return; }
+    PA.message('全班重設密碼', '<div style="text-align:left"><p style="margin:0 0 8px">' + esc(T.cls + ' ' + className(T.cls)) + ' 的 ' + list.length + ' 位學生，全部換成新的隨機密碼。舊密碼會立刻失效，學生要用新密碼登入。</p><label class="f">密碼格式' + pwModeSel('rpMode') + '</label></div>', [
+      { label: '取消' },
+      { label: '重設並列印', red: true, fn: function () {
+        var m = pwMode('rpMode'), seen = {}, items = list.map(function (s) { var p; do { p = PA.Roster.genPw(m); } while (seen[p]); seen[p] = 1; return { studentId: s.studentId, password: p }; });
+        tApi({ action: 'manageStudents', op: 'setPasswords', list: items }).then(function (r) {
+          if (r.status !== 'ok') return PA.message('重設失敗', esc(r.message));
+          PA.toast(r.message); loadDash();
+          var map = {}; items.forEach(function (x) { map[x.studentId] = x.password; });
+          setTimeout(function () { printMenu(list.map(function (s) { return Object.assign({}, s, { password: map[s.studentId] }); }), '新密碼已生效，要列印嗎？'); }, 300);
+        });
+      } }
+    ]);
+  };
+  $('#tImport').onclick = function () { var f = $('#tFile'); f.value = ''; f.click(); };
+  $('#tFile').onchange = function () {
+    var file = this.files && this.files[0]; if (!file) return;
+    PA.Roster.readFile(file).then(function (rows) { importPreview(PA.Roster.mapRows(rows, T.cls).list, file.name); }, function (e) { PA.message('讀不到這個檔案', esc(e.message || e)); });
+  };
+  function importPreview(list, fname) {
+    if (!list.length) { PA.message('名冊是空的', '在「' + esc(fname) + '」裡找不到學生。請確認第一列是標題（班級代號、班級名稱、座號、姓名、密碼），從第二列開始一列一位學生。<br><br>可以按「⬇ 下載 Excel 範本」照著填。'); return; }
+    var have = {}, cls = {}, newCls = {}, nNew = 0, nOld = 0, bad = 0;
+    T.dash.students.forEach(function (s) { have[s.classId + '_' + s.seatNo] = s; });
+    (T.dash.classes || []).forEach(function (c) { cls[c.classId] = 1; });
+    list.forEach(function (it) {
+      it.problem = !it.classId ? '沒有班級' : !/^[A-Za-z0-9_-]{1,12}$/.test(it.classId) ? '班級代號只能英數字' : !/^\d{1,2}$/.test(it.seat) ? '座號要是數字' : !it.name ? '沒有姓名' : '';
+      if (it.problem) { bad++; return; }
+      if (!cls[it.classId]) newCls[it.classId] = it.className || it.classId;
+      it.old = have[it.classId + '_' + it.seat]; if (it.old) nOld++; else nNew++;
+    });
+    var dup = {}; list.forEach(function (it) { if (it.problem) return; var k = it.classId + '_' + it.seat; if (dup[k]) { it.problem = '座號重複'; bad++; if (it.old) nOld--; else nNew--; } dup[k] = 1; });
+    var nc = Object.keys(newCls);
+    var rows = list.slice(0, 200).map(function (it) { return '<tr><td>' + it.row + '</td><td>' + esc(it.classId) + '</td><td>' + esc(it.seat) + '</td><td>' + esc(it.name) + '</td><td class="pwcell">' + (it.password ? esc(it.password) : '<span class="muted">' + (it.old ? '保留原密碼' : '自動產生') + '</span>') + '</td><td class="' + (it.problem ? 'bad' : '') + '">' + (it.problem ? '⚠ ' + esc(it.problem) + '，略過' : it.old ? '更新' : '新增') + '</td></tr>'; }).join('');
+    PA.message('匯入名冊：' + fname, '<div class="impsum">' + (nc.length ? '<span>🏫 新建班級 ' + nc.length + '（' + esc(nc.join('、')) + '）</span>' : '') + '<span>🆕 新增 ' + nNew + ' 位</span><span>✏ 更新 ' + nOld + ' 位</span>' + (bad ? '<span style="color:var(--bad)">⚠ 略過 ' + bad + ' 列</span>' : '') + '</div>' +
+      '<div class="impprev"><table class="tbl"><tr><th>列</th><th>班級</th><th>座號</th><th>姓名</th><th>密碼</th><th>結果</th></tr>' + rows + '</table></div>' +
+      '<div class="impopts"><label class="f" style="display:grid">密碼空白的新學生，自動產生' + pwModeSel('impMode') + '</label>' +
+      (nOld ? '<label><input type="checkbox" id="impOver"> Excel 裡有填密碼的，也覆蓋已經有帳號學生的舊密碼</label>' : '') + '</div>', [
+      { label: '取消' },
+      { label: '匯入 ' + (nNew + nOld) + ' 位', go: true, fn: function () {
+        var m = pwMode('impMode'), over = !!($('#impOver') && $('#impOver').checked), send = list.filter(function (it) { return !it.problem; }).map(function (it) {
+          return { row: it.row, classId: it.classId, className: it.className, seat: it.seat, name: it.name, password: it.password || (it.old ? '' : PA.Roster.genPw(m)) };
+        });
+        if (!send.length) return;
+        tApi({ action: 'manageStudents', op: 'import', list: send, overwrite: over }).then(function (r) {
+          if (r.status !== 'ok') return PA.message('匯入失敗', esc(r.message));
+          if (send[0]) T.cls = send[0].classId;
+          loadDash();
+          var names = {}; send.forEach(function (it) { if (it.className) names[it.classId] = it.className; });
+          var plist = r.list.map(function (x) { return { classId: x.classId, className: names[x.classId] || className(x.classId), seatNo: x.seat, name: x.name, password: x.password }; });
+          setTimeout(function () {
+            PA.message('匯入完成', '<p>' + esc(r.message) + '</p>' + (r.skipped && r.skipped.length ? '<div class="muted" style="font-size:12px;text-align:left">' + r.skipped.map(esc).join('<br>') + '</div>' : '') + '<p class="muted" style="font-size:13px">現在就列印帳號卡發給學生嗎？</p>', [
+              { label: '稍後再說' },
+              { label: '⬇ 帳號 Excel', fn: function () { PA.Roster.download(PA.Roster.exportXlsx(toPrint(plist), '匯入結果'), '帳號密碼_匯入結果.xlsx'); return true; } },
+              { label: '🖨 列印', go: true, fn: function () { setTimeout(function () { printMenu(plist, '列印剛匯入的 ' + plist.length + ' 位學生'); }, 10); return true; } }
+            ]);
+          }, 300);
+        });
+      } }
+    ]);
+    $('#ovMsg .dlg').style.width = 'min(720px, 100%)';
+    $('#msgA').addEventListener('click', function () { setTimeout(function () { if (!$('#ovMsg').classList.contains('on')) $('#ovMsg .dlg').style.width = ''; }, 0); }, { once: true });
+  }
   function confirmOp(t, m, fn) { setTimeout(function () { PA.message(t, m, [{ label: '取消' }, { label: '確定', red: true, fn: fn }]); }, 10); }
   function op(s, o, extra) { tApi(Object.assign({ action: 'manageStudents', op: o, studentId: s.studentId }, extra || {})).then(function (r) { PA.toast(r.message || ''); loadDash(); }); }
   function showWorks(s) {
